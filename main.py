@@ -1,6 +1,7 @@
 import sys
 from post import post_to_database
 from fetch import get_all_books
+from create_new_book import insert_to_database
 import uuid
 
 
@@ -26,5 +27,17 @@ elif args[1] == 'update':
     for book in books:
         post_to_database(book)
     print("Updated sucessfully!")
+elif args[1] == 'create':
+    book_name = input('Name of the book? ')
+    current_page = int(input('Whats the current page: '))
+    book = {'book_name': book_name, 'last_page': current_page or 0, 'id': str(uuid.uuid4()) }
+    insert_to_database(book)
 
-
+elif args[1].lower() == 'usage':
+    print("USAGE:")
+    print('='*30)
+    print("Without arguments, get updated page numbers")
+    print("options: update | create")
+    print("update: Update the page numbers of the books")
+    print("create: Create new books")
+    
