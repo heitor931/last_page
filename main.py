@@ -1,6 +1,6 @@
 import sys
 from datetime import date, datetime
-import time
+#import time
 
 # import uuid
 import pretty_tables as pt
@@ -9,7 +9,7 @@ from utils import post_to_database, get_all_books, insert_to_database
 
 args = sys.argv
 books = get_all_books()
-current_time = f"{datetime.now().hour}: {datetime.now().minute}"  
+current_date_time = f"{date.today()}-{datetime.now().hour}:{datetime.now().minute}"  
 
 
 if len(args) == 1:
@@ -35,10 +35,13 @@ if len(args) == 1:
 elif args[1] == "update":
 
     for book in books:
-        choice = int(input(f"{book['book_name']}: "))
+        choice = int(input(f"{book['book_name']} Current page: "))
         if choice:
-            book["last_page"] = choice
-            # book['id'] = len(books) + 1
+            book["current_page"] = choice
+            book["last_page_date"] = current_date_time
+            if book['last_page_date'] == book['total_pages']:
+                book['completed'] = True
+
     for book in books:
         post_to_database(book)
     print("Updated successfully!")
