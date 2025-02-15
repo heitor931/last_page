@@ -22,3 +22,29 @@ def get_all_books():
 
     except ConnectionError as e:
         raise ConnectionError("There was a connection error: ") from e
+    
+    
+def insert_to_database(data):
+    """insert to database
+
+    Args:
+        data (_type_): _object_
+    """
+    client =  open_connection()
+    
+    database = client.get_database("Book")
+    pages = database.get_collection("pages")
+    pages.insert_one(data)
+
+
+def post_to_database(data):
+    """post to database
+
+    Args:
+        data (_type_): _description_
+    """
+    client =  open_connection()
+    
+    database = client.get_database("Book")
+    pages = database.get_collection("pages")
+    pages.update_one({'id': data['id']}, {'$set': data}, upsert=True)
