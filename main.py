@@ -1,8 +1,10 @@
 import sys
+import pandas as pd
 from post import post_to_database
 from fetch import get_all_books
 from create_new_book import insert_to_database
 import uuid
+import pretty_tables
 
 
 args = sys.argv
@@ -11,14 +13,25 @@ if len(args) == 1:
     # Get updated data from database
     print('Fetching the latest data...')
     books_from_db = get_all_books()
-    print('-'*20)
-    for book in books_from_db:
-        print(f"{book['book_name']}: {book['last_page']}")
-    print('-'*20)
+    
+    headers = ['Book_Name', 'Pag_Number']
+    rows = [[x['book_name'], x['last_page']] for x in books_from_db]
+    
+    table = pretty_tables.create(
+        headers=headers,
+        rows=rows,
+        colors=[pretty_tables.Colors.green,pretty_tables.Colors.red]
+    )
+    
+    print(table)
+    
+     
+    print('-'*40)
     
     # Get the latest data
 elif args[1] == 'update':
-    books = [{'book_name': 'Web Security', 'id': "fdfgdfj", 'last_page': 0}, {'book_name': 'LPIC2', 'id': 'dhgchfchgdf7u65', 'last_page': 0} ]
+    
+    books = get_all_books()
     for book in books:
         choice = int(input(f"{book['book_name']}: "))
         if choice:
