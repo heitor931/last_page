@@ -3,14 +3,14 @@ from datetime import date, datetime
 #import time
 
 # import uuid
-import pretty_tables as pt
+from prettytable.colortable import ColorTable, Themes
 from utils import post_to_database, get_all_books, insert_to_database
 
 
 args = sys.argv
 books = get_all_books()
 current_date_time = f"{date.today()}-{datetime.now().hour}:{datetime.now().minute}"  
-
+table = ColorTable(theme=Themes.HIGH_CONTRAST)
 
 if args[1] == 'list':
     # Get updated data from database
@@ -18,16 +18,22 @@ if args[1] == 'list':
 
     headers = ["id", "Book_Name","Curr.Page","Last time read", "Num.Pages","Started_Date", "Due_date", "Completed" ]
     rows = [[x["id"], x["book_name"],x['current_page'],x['last_page_date'], x["total_pages"],x['start_date'], x['due_date'],x['completed']] for x in books]
+    table.field_names = headers
+    table.add_rows(rows)
+    #table.border = True
+    table.align['Book_Name'] = 'l'
+    table.align['Curr.Page'] = 'c'
+    print(table.get_string(border=True))
 
-    table = pt.create(
-        headers=headers,
-        rows=rows,
-        colors=[pt.Colors.white, pt.Colors.red, pt.Colors.yellow, pt.Colors.blue, pt.Colors.cyan, pt.Colors.green, pt.Colors.purple,pt.Colors.black],
-    )
+
+    # table = pt.create(
+    #     headers=headers,
+    #     rows=rows,
+    #     colors=[pt.Colors.white, pt.Colors.red, pt.Colors.yellow, pt.Colors.blue, pt.Colors.cyan, pt.Colors.green, pt.Colors.purple,pt.Colors.black],
     # )
-    print("-" * 120)
-    print(table)
-    print("-" * 120)
+    # # )
+    #print("-" * 120)
+    #print("-" * 120)
 
     # Get the latest data
 elif args[1] == "update":
