@@ -6,7 +6,8 @@ from colorama import Fore, Back, Style
 # import uuid
 from prettytable.colortable import ColorTable, Themes
 import pretty_tables as pt
-from utils import post_to_database, get_all_books, insert_to_database, find_one_from_database, quick_update_book, generate_weekdays
+from utils import post_to_database, get_all_books, insert_to_database, delete_book, find_one_from_database, \
+    quick_update_book, generate_weekdays, delete_all_books
 
 args = sys.argv
 books = get_all_books()
@@ -48,6 +49,8 @@ if args[1] == 'list':
 
     # Get updated data from database
     # Get the latest data
+
+# Updating the pages
 elif args[1] == "update":
     if len(args) == 2:
         for book in books:
@@ -59,7 +62,7 @@ elif args[1] == "update":
             try:
                 book["current_page"] = sanitized_choice
                 book["last_page_date"] = current_date_time
-                if book['last_page_date'] == book['total_pages']:
+                if book['current_page'] == sanitized_choice:
                     book['completed'] = True
                 post_to_database(book)
                 print("Updated successfully!")
@@ -78,7 +81,7 @@ elif args[1] == "update":
                             sanitized_choice = int(choice)
                         book["current_page"] = sanitized_choice
                         book["last_page_date"] = current_date_time
-                        if book['last_page_date'] == book['total_pages']:
+                        if book['current_page'] == book['total_pages']:
                             book['completed'] = True
                         post_to_database(book)
                         print("Updated successfully!")
@@ -86,7 +89,7 @@ elif args[1] == "update":
                     except ValueError as e:
                         print('Not a valid choice')
         else:
-            print("There is no book with this Id")
+            print(Fore.RED + "There is no book with this Id")
     elif len(args) == 4:
         if int(args[2]) in [x['id'] for x in books]:
             for book in books:
@@ -97,24 +100,24 @@ elif args[1] == "update":
                         book["last_page_date"] = current_date_time
                         if book['current_page'] == sanitized_choice:
                             book['completed'] = True
-                        quick_update_book(book['id'], sanitized_choice)
+                        quick_update_book(book)
                         print(Fore.LIGHTGREEN_EX +  f"{book['book_name']} updated current page successfully!")
                         find_one_from_database(book['id'])
                         break
                     except ValueError as e:
                         print('Not a valid choice')
         else:
-            print("There is no book with this Id")
+            print(Fore.RED + "There is no book with this Id")
 
 # Create new Books for reading
 elif args[1] == "add":
-    track_list = books.copy()
+    track_list = [0] if len(books) == 0 else [int(x['id']) for x in books]
     while True:
         book_name = input("What is the name of the Book? ")
         total_pages = int(input("Whats the number of pages?: "))
         due_date = input('What is the scheduled due date?:')
         book = {
-            "id": len(track_list) + 1,
+            "id": max(track_list) + 1,
             "book_name": book_name,
             "current_page": 0,
             'last_page_date': "",
@@ -124,16 +127,33 @@ elif args[1] == "add":
             'completed': False,
             #'last_page_date': f"{date.today}-{current_time}"
         }
+        print(book)
+        track_list.append(book)
+        insert_to_database(book)
+        print(Fore.BLUE + "Book created successfully")
         print('-'*70)
         more = input('Do you want to add more books?[Y/N]')
 
-        track_list.append(book)
-        insert_to_database(book)
         if more.lower() == 'n':
-            get_all_books()
             break
+        get_all_books()
 
 # Delete books from the list
+elif args[1] == 'delete':
+    if args[2] == 'all':
+        delete_all_books()
+        print(Fore.RED + "All books deleted successfully")
+    else:
+        for book in books:
+            if int(args[2]) in [x['id'] for x in books]:
+                delete_book(int(args[2]))
+                print(Fore.RED + f"{book['Book_name'] } book deleted successfully")
+                break
+            else:
+                print(Fore.RED + "There is no book with this Id")
+                break
+
+
 
 # Usage of the application
 elif args[1].lower() == "usage":

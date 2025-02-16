@@ -58,11 +58,11 @@ def find_one_from_database(query):
     client.close()
     return book
 
-def quick_update_book(book_id, book_page):
+def quick_update_book(book):
     client = open_connection()
     database = client.get_database("Book")
     pages = database.get_collection("pages")
-    pages.update_one({'id': book_id}, {'$set': {'current_page': book_page}})
+    pages.update_one({'id': book['id']}, {'$set': book})
 
 def generate_weekdays(day=False, month=False):
     if day:
@@ -75,4 +75,16 @@ def generate_weekdays(day=False, month=False):
         months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
         day_month = months[month_id]
         return day_month
+
+def delete_book(book_id):
+    client = open_connection()
+    database = client.get_database("Book")
+    pages = database.get_collection("pages")
+    pages.delete_one({'id': book_id})
+
+def delete_all_books():
+    client = open_connection()
+    database = client.get_database("Book")
+    pages = database.get_collection("pages")
+    pages.delete_many({})
 
