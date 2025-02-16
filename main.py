@@ -12,6 +12,8 @@ books = get_all_books()
 current_date_time = f"{date.today()}-{datetime.now().hour}:{datetime.now().minute}"
 table = ColorTable(theme=Themes.HIGH_CONTRAST)
 
+
+# List all reading books
 if args[1] == 'list':
     headers = ["id", "Book_Name", "Curr.Page", "Last time read", "Num.Pages", "Started_Date", "Due_date", "Completed"]
     rows = [[x["id"], x["book_name"], x['current_page'], x['last_page_date'], x["total_pages"], x['start_date'],

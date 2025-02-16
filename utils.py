@@ -54,4 +54,5 @@ def find_one_from_database(query):
     database = client.get_database("Book")
     pages = database.get_collection("pages")
     book = pages.find_one({'id': query},{'_id': 0})
+    client.close()
     return book
