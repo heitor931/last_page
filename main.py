@@ -1,15 +1,16 @@
 import sys
 from datetime import date, datetime
+from colorama import Fore, Back, Style
 #import time
 
 # import uuid
 from prettytable.colortable import ColorTable, Themes
 import pretty_tables as pt
-from utils import post_to_database, get_all_books, insert_to_database, find_one_from_database
+from utils import post_to_database, get_all_books, insert_to_database, find_one_from_database, quick_update_book, generate_weekdays
 
 args = sys.argv
 books = get_all_books()
-current_date_time = f"{date.today()}-{datetime.now().hour}:{datetime.now().minute}"
+current_date_time = f"{datetime.now().day}/{generate_weekdays(False, True)},{datetime.now().hour}:{datetime.now().minute},{generate_weekdays(True)}"
 table = ColorTable(theme=Themes.HIGH_CONTRAST)
 
 if args[1] == 'list':
@@ -64,29 +65,46 @@ elif args[1] == "update":
                 print("Updated successfully!")
             except ValueError as e:
                 print('Not a valid choice')
-    elif len(args) >= 3:
-        indexes = args[2:]
-        for idx in indexes:
-            if int(idx) in [x['id'] for x in books]:
-                for book in books:
-                    if int(idx) == book['id']:
-                        try:
-                            choice = (input(f"{book['book_name']} - [Current page]: "))
-                            if not choice:
-                                continue
-                            else:
-                                sanitized_choice = int(choice)
-                            book["current_page"] = sanitized_choice
-                            book["last_page_date"] = current_date_time
-                            if book['last_page_date'] == book['total_pages']:
-                                book['completed'] = True
-                            post_to_database(book)
-                            print("Updated successfully!")
-                            break
-                        except ValueError as e:
-                            print('Not a valid choice')
-            else:
-                print("There is no book with this Id")
+    elif len(args) == 3:
+        pass
+        if int(args[2]) in [x['id'] for x in books]:
+            for book in books:
+                if int(args[2]) == book['id']:
+                    try:
+                        choice = (input(f"{book['book_name']} - [Current page]: "))
+                        if not choice:
+                            continue
+                        else:
+                            sanitized_choice = int(choice)
+                        book["current_page"] = sanitized_choice
+                        book["last_page_date"] = current_date_time
+                        if book['last_page_date'] == book['total_pages']:
+                            book['completed'] = True
+                        post_to_database(book)
+                        print("Updated successfully!")
+                        break
+                    except ValueError as e:
+                        print('Not a valid choice')
+        else:
+            print("There is no book with this Id")
+    elif len(args) == 4:
+        if int(args[2]) in [x['id'] for x in books]:
+            for book in books:
+                if int(args[2]) == book['id']:
+                    try:
+                        sanitized_choice = int(args[3])
+                        book["current_page"] = sanitized_choice
+                        book["last_page_date"] = current_date_time
+                        if book['current_page'] == sanitized_choice:
+                            book['completed'] = True
+                        quick_update_book(book['id'], sanitized_choice)
+                        print(Fore.LIGHTGREEN_EX +  f"{book['book_name']} updated current page successfully!")
+                        find_one_from_database(book['id'])
+                        break
+                    except ValueError as e:
+                        print('Not a valid choice')
+        else:
+            print("There is no book with this Id")
 
 # Create new Books for reading
 elif args[1] == "add":

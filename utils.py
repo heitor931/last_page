@@ -1,4 +1,5 @@
 from mongo_connection import open_connection
+from datetime import datetime
 
 
 def get_all_books():
@@ -54,4 +55,24 @@ def find_one_from_database(query):
     database = client.get_database("Book")
     pages = database.get_collection("pages")
     book = pages.find_one({'id': query},{'_id': 0})
+    client.close()
     return book
+
+def quick_update_book(book_id, book_page):
+    client = open_connection()
+    database = client.get_database("Book")
+    pages = database.get_collection("pages")
+    pages.update_one({'id': book_id}, {'$set': {'current_page': book_page}})
+
+def generate_weekdays(day=False, month=False):
+    if day:
+        day_code = datetime.now().weekday()
+        weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+        day = weekdays[day_code]
+        return day
+    if month:
+        month_id = datetime.now().month
+        months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+        day_month = months[month_id]
+        return day_month
+
