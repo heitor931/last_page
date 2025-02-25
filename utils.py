@@ -1,5 +1,7 @@
 from mongo_connection import open_connection
 from datetime import datetime
+import pretty_tables as pt
+from colorama import Fore, Back, Style
 
 
 def get_all_books():
@@ -88,3 +90,36 @@ def delete_all_books():
     pages = database.get_collection("pages")
     pages.delete_many({})
 
+def show_tables(books, args):
+    headers = ["id", "Book_Name", "Curr.Page", "Last time read", "Num.Pages", "Started_Date", "Due_date", "Completed"]
+    rows = [[x["id"], x["book_name"], x['current_page'], x['last_page_date'], x["total_pages"], x['start_date'],
+             x['due_date'], x['completed']] for x in books]
+    if len(args) == 3 and args[2] == 'tab1':
+        table = pt.create(
+            headers=headers,
+            rows=rows,
+            colors=[pt.Colors.white, pt.Colors.red, pt.Colors.yellow, pt.Colors.blue, pt.Colors.cyan, pt.Colors.green,
+                    pt.Colors.purple, pt.Colors.black],
+        )
+        # )
+        print("-" * 120)
+        print(table)
+        print("-" * 120)
+    elif len(args) == 3:
+        if int(args[2]) in [x['id'] for x in books]:
+            book = find_one_from_database(int(args[2]))
+            table.field_names = headers
+            table.add_row([x for x in book.values()])
+            table.align['Book_Name'] = 'l'
+            table.align['Curr.Page'] = 'c'
+            print(table.get_string(border=True))
+    # Print to the beautiful tables
+
+    elif len(args) == 2:
+        print("Fetching the latest data...")
+        table.field_names = headers
+        table.add_rows(rows)
+        # table.border = True
+        table.align['Book_Name'] = 'l'
+        table.align['Curr.Page'] = 'c'
+        print(table.get_string(border=True))

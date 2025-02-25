@@ -1,54 +1,21 @@
 import sys
 from datetime import date, datetime
 from colorama import Fore, Back, Style
-#import time
-
-# import uuid
 from prettytable.colortable import ColorTable, Themes
-import pretty_tables as pt
 from utils import post_to_database, get_all_books, insert_to_database, delete_book, find_one_from_database, \
-    quick_update_book, generate_weekdays, delete_all_books
+    quick_update_book, generate_weekdays, delete_all_books, show_tables
 
 args = sys.argv
 books = get_all_books()
 current_date_time = f"{datetime.now().day}/{generate_weekdays(False, True)},{datetime.now().hour}:{datetime.now().minute},{generate_weekdays(True)}"
 table = ColorTable(theme=Themes.HIGH_CONTRAST)
 
+
+# List all
 if args[1] == 'list':
-    headers = ["id", "Book_Name", "Curr.Page", "Last time read", "Num.Pages", "Started_Date", "Due_date", "Completed"]
-    rows = [[x["id"], x["book_name"], x['current_page'], x['last_page_date'], x["total_pages"], x['start_date'],
-             x['due_date'], x['completed']] for x in books]
-    if len(args) == 3 and args[2] == 'tab1':
-        table = pt.create(
-            headers=headers,
-            rows=rows,
-            colors=[pt.Colors.white, pt.Colors.red, pt.Colors.yellow, pt.Colors.blue, pt.Colors.cyan, pt.Colors.green, pt.Colors.purple,pt.Colors.black],
-        )
-        # )
-        #print("-" * 120)
-        print(table)
-        #print("-" * 120)
-    elif len(args) == 3:
-        if int(args[2]) in [x['id'] for x in books]:
-            book = find_one_from_database(int(args[2]))
-            table.field_names = headers
-            table.add_row([x for x in book.values()])
-            table.align['Book_Name'] = 'l'
-            table.align['Curr.Page'] = 'c'
-            print(table.get_string(border=True))
-      # Print to the beautiful tables
+    # Print table
+    show_tables(books, args)
 
-    elif len(args) == 2:
-        print("Fetching the latest data...")
-        table.field_names = headers
-        table.add_rows(rows)
-        # table.border = True
-        table.align['Book_Name'] = 'l'
-        table.align['Curr.Page'] = 'c'
-        print(table.get_string(border=True))
-
-    # Get updated data from database
-    # Get the latest data
 
 # Updating the pages
 elif args[1] == "update":
